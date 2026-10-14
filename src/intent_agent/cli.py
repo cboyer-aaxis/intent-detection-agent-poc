@@ -17,6 +17,10 @@ def main() -> None:
     p_serve.add_argument("--host", default="127.0.0.1")
     p_serve.add_argument("--port", type=int, default=8000)
 
+    p_demo = sub.add_parser("demo", help="Run the browser demo (query form and results page)")
+    p_demo.add_argument("--host", default="127.0.0.1")
+    p_demo.add_argument("--port", type=int, default=8080)
+
     p_eval = sub.add_parser("eval", help="Evaluate against a labelled JSONL dataset")
     p_eval.add_argument("--dataset", type=Path, default=PROJECT_ROOT / "eval" / "dataset.jsonl")
     p_eval.add_argument("--output", type=Path, default=None, help="Write per-query results as JSON")
@@ -28,6 +32,11 @@ def main() -> None:
         import uvicorn
 
         uvicorn.run("intent_agent.api:app", host=args.host, port=args.port)
+        return
+    if args.command == "demo":
+        import uvicorn
+
+        uvicorn.run("intent_agent.web:app", host=args.host, port=args.port)
         return
 
     from intent_agent.classifier import IntentClassifier

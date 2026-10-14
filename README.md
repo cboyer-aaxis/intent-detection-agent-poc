@@ -23,8 +23,9 @@ src/intent_agent/
   llm.py                   Provider clients: OpenAI-compatible and Claude (Anthropic / Foundry)
   classifier.py            Prompting, output parsing, fallback
   api.py                   FastAPI service: POST /classify, GET /health, GET /routes
+  web.py                   Browser demo: query form (/) and results page (/result)
   evaluate.py              Accuracy / per-route precision-recall / latency report
-  cli.py                   `intent-agent classify | serve | eval`
+  cli.py                   `intent-agent classify | serve | demo | eval`
 ```
 
 ## Quick start (local SLM via Ollama)
@@ -38,6 +39,7 @@ cp .env.example .env                       # default profile points at local Oll
 
 uv run intent-agent classify "red running shoes size 10 under \$100"
 uv run intent-agent serve                  # http://127.0.0.1:8000/docs
+uv run intent-agent demo                   # browser demo at http://127.0.0.1:8080
 uv run intent-agent eval --output eval/results/phi4-mini.json
 uv run pytest
 ```
@@ -47,6 +49,10 @@ curl -s localhost:8000/classify -H 'content-type: application/json' -d '{"query"
 # {"query":"MX-5500-B","route":"Exact Match Search","confidence":0.97,"fallback_used":false,
 #  "model":"phi4-mini","latency_ms":212.4,"input_tokens":640,"output_tokens":14}
 ```
+
+### Browser demo
+
+`intent-agent demo` starts a separate web app for showing the agent to users. It has a form with a **Query** field. Submitting it opens a results page with the detected route, a short description of that route, the model's confidence, and the model, latency and token counts. If the model call fails, the page says that the fallback route is being shown. The demo uses the same `.env` settings as `serve`. Use `--host 0.0.0.0` to let other machines on your network open it, and `--port` to change the port.
 
 Switching models or providers only takes environment variables; see `.env.example` for the Ollama, Azure Foundry (OpenAI-compatible), Claude-on-Foundry and Anthropic API profiles. Any OpenAI-compatible server works too (LM Studio, vLLM, llama.cpp server).
 
