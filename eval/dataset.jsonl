@@ -1,0 +1,12 @@
+{"query": "garden hoses", "expected": "Keyword Search"}
+{"query": "office chairs", "expected": "Keyword Search"}
+{"query": "camping gear", "expected": "Keyword Search"}
+{"query": "MX-5500-B", "expected": "Exact Match Search"}
+{"query": "order #A1029384", "expected": "Exact Match Search"}
+{"query": "ISBN 978-0-13-468599-1", "expected": "Exact Match Search"}
+{"query": "what's the difference between OLED and QLED?", "expected": "Ask&Find"}
+{"query": "what should I bring on a 3 day hiking trip", "expected": "Ask&Find"}
+{"query": "is this blender dishwasher safe", "expected": "Ask&Find"}
+{"query": "leather sofas under $1500 grey", "expected": "Filtered Search"}
+{"query": "Nike womens jackets size M on sale", "expected": "Filtered Search"}
+{"query": "4K monitors 27 inch rated 4 stars and up", "expected": "Filtered Search"}

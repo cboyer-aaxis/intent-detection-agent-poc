@@ -1,0 +1,21 @@
+# Few-shot examples rendered into the system prompt's {examples} slot.
+# PLACEHOLDERS: replace with real examples from your domain. Aim for 3-8 per route,
+# including tricky boundary cases. Keep these separate from eval/dataset.jsonl
+# so the eval measures generalization rather than memorization.
+examples:
+  - query: "750ml Bottle"
+    route: "Filtered Search"
+  - query: "PET Bottle"
+    route: "Filtered Search"
+  - query: "SKU 4471-BX-200"
+    route: "Exact Match Search"
+  - query: "Bottle for shampoo"
+    route: "Semantic Search"
+  - query: "Can PET bottles hold essential oils?"
+    route: "Ask&Find"
+  - query: "Find alternatives to this bottle"
+    route: "Ask&Find"
+  - query: "Show suppliers in Mexico"
+    route: "Filtered Search"
+  - query: "Boston Rounds"
+    route: "Keyword Search"
