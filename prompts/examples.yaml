@@ -10,7 +10,7 @@ examples:
   - query: "SKU 4471-BX-200"
     route: "Exact Match Search"
   - query: "Bottle for shampoo"
-    route: "Semantic Search"
+    route: "Keyword Search"
   - query: "Can PET bottles hold essential oils?"
     route: "Ask&Find"
   - query: "Find alternatives to this bottle"
