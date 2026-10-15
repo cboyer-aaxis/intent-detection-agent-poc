@@ -1,5 +1,7 @@
 """Browser demo: a query form and a results page. Run with `intent-agent demo`."""
 
+import logging
+import time
 from html import escape
 
 from fastapi import Depends, FastAPI, Query
@@ -8,6 +10,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from intent_agent.api import get_classifier
 from intent_agent.classifier import Classification, IntentClassifier
 from intent_agent.routes import Route
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Intent Detection Demo", version="0.1.0", docs_url=None, redoc_url=None)
 
@@ -64,7 +68,14 @@ def result(
 ) -> HTMLResponse | RedirectResponse:
     if not query.strip():
         return RedirectResponse("/", status_code=303)
-    return _page("Result - Intent Detection Demo", _render_result(classifier.classify(query)))
+    start = time.perf_counter()
+    c = classifier.classify(query)
+    page = _page("Result - Intent Detection Demo", _render_result(c))
+    logger.info(
+        "Demo request resolved in %.1f ms: query=%r route=%r model=%s fallback=%s",
+        (time.perf_counter() - start) * 1000, c.query, c.route.value, c.model, c.fallback_used,
+    )
+    return page
 
 
 def _render_result(c: Classification) -> str:

@@ -30,6 +30,15 @@ def test_result_page_shows_route_and_escapes_query():
     assert "fallback" not in r.text
 
 
+def test_result_page_logs_resolution_time(caplog):
+    caplog.set_level("INFO", logger="intent_agent.web")
+    client_for('{"route": "Hybrid Search", "confidence": 0.9}').get("/result", params={"query": "red bottles"})
+    [record] = [r for r in caplog.records if r.name == "intent_agent.web"]
+    assert record.levelname == "INFO"
+    assert "Demo request resolved in" in record.getMessage()
+    assert "route='Hybrid Search'" in record.getMessage()
+
+
 def test_result_page_flags_fallback():
     r = client_for(RuntimeError("boom")).get("/result", params={"query": "anything"})
     assert "Hybrid Search" in r.text
