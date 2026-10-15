@@ -53,6 +53,17 @@ curl -s localhost:8000/classify -H 'content-type: application/json' -d '{"query"
 
 `intent-agent demo` starts a separate web app for showing the agent to users. It has a form with a **Query** field. Submitting it opens a results page with the detected route, a short description of that route, the model's confidence, and the model, latency and token counts. If the model call fails, the page says that the fallback route is being shown. The demo uses the same `.env` settings as `serve`. Use `--host 0.0.0.0` to let other machines on your network open it, and `--port` to change the port.
 
+### Docker
+
+The image runs the REST API on port 8000 and the browser demo on port 8080 in one container. If either one stops, the container exits.
+
+```bash
+docker build -t intent-agent .
+docker run --rm --env-file .env -p 8000:8000 -p 8080:8080 intent-agent
+```
+
+If the model runs in Ollama on your machine, set `LLM_BASE_URL=http://host.docker.internal:11434/v1` in `.env`, because `localhost` inside the container is the container itself.
+
 Switching models or providers only takes environment variables; see `.env.example` for the Ollama, Azure Foundry (OpenAI-compatible), Claude-on-Foundry and Anthropic API profiles. Any OpenAI-compatible server works too (LM Studio, vLLM, llama.cpp server).
 
 ## Customizing
@@ -65,7 +76,7 @@ Switching models or providers only takes environment variables; see `.env.exampl
 
 - **Phi / Llama / Mistral / GPT** deployments: use `LLM_PROVIDER=openai_compatible` and point `LLM_BASE_URL` at the resource's OpenAI v1 endpoint. Use `LLM_RESPONSE_FORMAT=json_schema` where the model supports it, otherwise `json_object`.
 - **Claude**: use `LLM_PROVIDER=anthropic_foundry` and `ANTHROPIC_FOUNDRY_RESOURCE`.
-- **Hosting the service:** the `Dockerfile` builds an image you can run on Azure Container Apps or App Service. Alternatively, wrap `IntentClassifier` as a Foundry Agent Service tool.
+- **Hosting the service:** the `Dockerfile` builds an image (API on 8000, demo on 8080) you can run on Azure Container Apps or App Service. Alternatively, wrap `IntentClassifier` as a Foundry Agent Service tool.
 - **Before production:** replace API keys with Entra ID / managed identity, add App Insights tracing, and put the eval into CI so prompt or model changes can't silently regress.
 
 ## Candidate models

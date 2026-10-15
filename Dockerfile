@@ -6,9 +6,11 @@ WORKDIR /app
 COPY pyproject.toml uv.lock* README.md ./
 COPY src ./src
 COPY prompts ./prompts
+COPY docker/start.sh ./start.sh
 RUN uv sync --no-dev --frozen || uv sync --no-dev
 
 RUN useradd --create-home appuser
 USER appuser
-EXPOSE 8000
-CMD ["uv", "run", "--no-sync", "intent-agent", "serve", "--host", "0.0.0.0", "--port", "8000"]
+# 8000: REST/JSON API (`serve`), 8080: browser demo (`demo`)
+EXPOSE 8000 8080
+CMD ["./start.sh"]
