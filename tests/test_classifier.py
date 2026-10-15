@@ -29,11 +29,12 @@ def make_classifier(reply: str | Exception) -> IntentClassifier:
 @pytest.mark.parametrize(
     "text, expected",
     [
-        ('{"route": "Filtered Search", "confidence": 0.9}', (Route.FILTERED_SEARCH, 0.9)),
+        ('{"route": "Hybrid Search", "confidence": 0.9}', (Route.HYBRID_SEARCH, 0.9)),
         ('```json\n{"route": "Ask&Find", "confidence": 0.8}\n```', (Route.ASK_AND_FIND, 0.8)),
-        ('<think>hmm</think>{"route": "exact match search", "confidence": 2}', (Route.EXACT_MATCH_SEARCH, 1.0)),
+        ('<think>hmm</think>{"route": "exact match", "confidence": 2}', (Route.EXACT_MATCH, 1.0)),
         ('Sure! {"route": "Ask & Find", "confidence": "high"}', (Route.ASK_AND_FIND, 0.5)),
-        ("Keyword Search", (Route.KEYWORD_SEARCH, 0.5)),
+        ("Hybrid Search", (Route.HYBRID_SEARCH, 0.5)),
+        ('{"route": "Keyword Search", "confidence": 0.9}', None),
         ('{"route": "Semantic Search", "confidence": 0.9}', None),
         ("", None),
     ],
@@ -43,8 +44,8 @@ def test_parse_response(text, expected):
 
 
 def test_classify_success():
-    c = make_classifier('{"route": "Exact Match Search", "confidence": 0.95}').classify("  SKU 123  ")
-    assert c.route == Route.EXACT_MATCH_SEARCH
+    c = make_classifier('{"route": "Exact Match", "confidence": 0.95}').classify("  SKU 123  ")
+    assert c.route == Route.EXACT_MATCH
     assert c.confidence == 0.95
     assert not c.fallback_used
     assert c.query == "SKU 123"
@@ -52,7 +53,7 @@ def test_classify_success():
 
 def test_classify_falls_back_on_llm_error():
     c = make_classifier(RuntimeError("boom")).classify("anything")
-    assert c.route == Route.KEYWORD_SEARCH
+    assert c.route == Route.HYBRID_SEARCH
     assert c.fallback_used
 
 
@@ -62,7 +63,7 @@ def test_classify_falls_back_on_garbage():
 
 
 def test_system_prompt_includes_routes_and_examples():
-    classifier = make_classifier('{"route": "Keyword Search", "confidence": 1}')
+    classifier = make_classifier('{"route": "Hybrid Search", "confidence": 1}')
     assert "Ask&Find" in classifier.system_prompt
     assert "{examples}" not in classifier.system_prompt
     assert "SKU 4471-BX-200" in classifier.system_prompt
@@ -70,12 +71,12 @@ def test_system_prompt_includes_routes_and_examples():
 
 def test_api_classify():
     app.dependency_overrides[get_classifier] = lambda: make_classifier(
-        '{"route": "Filtered Search", "confidence": 0.7}'
+        '{"route": "Hybrid Search", "confidence": 0.7}'
     )
     try:
         resp = TestClient(app).post("/classify", json={"query": "blue jeans under $40"})
         assert resp.status_code == 200
-        assert resp.json()["route"] == "Filtered Search"
+        assert resp.json()["route"] == "Hybrid Search"
         assert TestClient(app).post("/classify", json={"query": ""}).status_code == 422
     finally:
         app.dependency_overrides.clear()

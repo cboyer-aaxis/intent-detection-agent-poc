@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     examples_path: Path = PROJECT_ROOT / "prompts" / "examples.yaml"
 
     # Route returned when the model fails or produces an unusable answer.
-    fallback_route: Route = Route.KEYWORD_SEARCH
+    fallback_route: Route = Route.HYBRID_SEARCH
     max_query_chars: int = 1000
 
 

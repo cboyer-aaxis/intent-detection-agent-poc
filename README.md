@@ -1,15 +1,14 @@
 # Intent Detection Agent (POC)
 
-Classifies a search query into one of four routes for an online search engine:
+Classifies a search query into one of three routes for an online search engine:
 
 | Route | Typical query |
 |---|---|
-| `Keyword Search` | `wireless headphones` |
-| `Exact Match Search` | `SKU 4471-BX-200`, `"exact phrase"` |
+| `Hybrid Search` | `wireless headphones`, `red running shoes size 10 under $100` |
+| `Exact Match` | `SKU 4471-BX-200`, `"exact phrase"` |
 | `Ask&Find` | `which laptop is better for video editing?` |
-| `Filtered Search` | `red running shoes size 10 under $100` |
 
-It makes a single LLM call per query, using a few-shot system prompt and JSON output. The answer is validated against the four routes. If the model errors or returns something unusable, the agent falls back to a safe route (`Keyword Search` by default), so a model failure never breaks search.
+It makes a single LLM call per query, using a few-shot system prompt and JSON output. The answer is validated against the three routes. If the model errors or returns something unusable, the agent falls back to a safe route (`Hybrid Search` by default), so a model failure never breaks search.
 
 ## Layout
 
@@ -18,7 +17,7 @@ prompts/system_prompt.md   System prompt template ({routes} and {examples} are f
 prompts/examples.yaml      Few-shot examples  <-- put your examples here
 eval/dataset.jsonl         Labelled held-out queries for measuring accuracy
 src/intent_agent/
-  routes.py                Route enum (the 4 valid labels)
+  routes.py                Route enum (the 3 valid labels)
   config.py                Env/.env driven settings
   llm.py                   Provider clients: OpenAI-compatible and Claude (Anthropic / Foundry)
   classifier.py            Prompting, output parsing, fallback
@@ -46,7 +45,7 @@ uv run pytest
 
 ```bash
 curl -s localhost:8000/classify -H 'content-type: application/json' -d '{"query":"MX-5500-B"}'
-# {"query":"MX-5500-B","route":"Exact Match Search","confidence":0.97,"fallback_used":false,
+# {"query":"MX-5500-B","route":"Exact Match","confidence":0.97,"fallback_used":false,
 #  "model":"phi4-mini","latency_ms":212.4,"input_tokens":640,"output_tokens":14}
 ```
 
@@ -59,7 +58,7 @@ Switching models or providers only takes environment variables; see `.env.exampl
 ## Customizing
 
 1. **Examples:** replace the placeholders in `prompts/examples.yaml` with your own (3-8 per route, including boundary cases). Invalid route labels fail fast at startup.
-2. **Route definitions:** the definitions in `prompts/system_prompt.md` are my reading of the four routes. Adjust them to match how your search backend actually behaves.
+2. **Route definitions:** the definitions in `prompts/system_prompt.md` are my reading of the three routes. Adjust them to match how your search backend actually behaves.
 3. **Eval set:** grow `eval/dataset.jsonl` to 100+ real queries, ideally sampled from search logs and labelled by people. Keep it separate from the few-shot examples.
 
 ## Moving to Azure Foundry
@@ -71,7 +70,7 @@ Switching models or providers only takes environment variables; see `.env.exampl
 
 ## Candidate models
 
-Routing between 4 classes is an easy task for current models. What separates candidates here is **latency, cost per query, and reliable JSON output**, more than raw intelligence. Run `intent-agent eval` against each finalist on your own data before choosing.
+Routing between 3 classes is an easy task for current models. What separates candidates here is **latency, cost per query, and reliable JSON output**, more than raw intelligence. Run `intent-agent eval` against each finalist on your own data before choosing.
 
 ### Small language models (local and Foundry)
 

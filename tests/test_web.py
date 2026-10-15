@@ -32,7 +32,7 @@ def test_result_page_shows_route_and_escapes_query():
 
 def test_result_page_flags_fallback():
     r = client_for(RuntimeError("boom")).get("/result", params={"query": "anything"})
-    assert "Keyword Search" in r.text
+    assert "Hybrid Search" in r.text
     assert "fallback route" in r.text
 
 

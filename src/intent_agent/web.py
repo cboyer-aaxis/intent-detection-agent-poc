@@ -12,10 +12,9 @@ from intent_agent.routes import Route
 app = FastAPI(title="Intent Detection Demo", version="0.1.0", docs_url=None, redoc_url=None)
 
 _ROUTE_DESCRIPTIONS = {
-    Route.KEYWORD_SEARCH: "Broad product or topic terms, matched by keyword relevance.",
-    Route.EXACT_MATCH_SEARCH: "Identifiers such as SKUs, part numbers or quoted phrases.",
+    Route.HYBRID_SEARCH: "Product or topic searches, with or without attributes like size, color or price.",
+    Route.EXACT_MATCH: "Identifiers such as SKUs, part numbers or quoted phrases.",
     Route.ASK_AND_FIND: "Natural-language questions that need an answer, not just a list.",
-    Route.FILTERED_SEARCH: "Product queries with attribute constraints like size, color or price.",
 }
 
 _STYLE = """

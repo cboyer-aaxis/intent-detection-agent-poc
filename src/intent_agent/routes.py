@@ -4,10 +4,9 @@ from enum import Enum
 class Route(str, Enum):
     """Valid routing targets. The string values are the canonical labels the model must emit."""
 
-    KEYWORD_SEARCH = "Keyword Search"
-    EXACT_MATCH_SEARCH = "Exact Match Search"
+    HYBRID_SEARCH = "Hybrid Search"
+    EXACT_MATCH = "Exact Match"
     ASK_AND_FIND = "Ask&Find"
-    FILTERED_SEARCH = "Filtered Search"
 
     @classmethod
     def labels(cls) -> list[str]:
