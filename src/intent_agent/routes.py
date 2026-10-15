@@ -22,5 +22,9 @@ class Route(str, Enum):
         return None
 
 
+# Routes the model may choose. Exact Match is decided by the keyword rule in exact_match.py, never by the model.
+LLM_ROUTES = (Route.HYBRID_SEARCH, Route.ASK_AND_FIND)
+
+
 def _normalize(value: str) -> str:
     return "".join(ch for ch in value.lower() if ch.isalnum() or ch == "&")

@@ -6,6 +6,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock* README.md ./
 COPY src ./src
 COPY prompts ./prompts
+COPY config ./config
 COPY docker/start.sh ./start.sh
 RUN uv sync --no-dev --frozen || uv sync --no-dev
 

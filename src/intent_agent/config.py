@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     system_prompt_path: Path = PROJECT_ROOT / "prompts" / "system_prompt.md"
     examples_path: Path = PROJECT_ROOT / "prompts" / "examples.yaml"
+    exact_match_keywords_path: Path = PROJECT_ROOT / "config" / "exact_match_keywords.yaml"
 
     # Route returned when the model fails or produces an unusable answer.
     fallback_route: Route = Route.HYBRID_SEARCH

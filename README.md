@@ -5,22 +5,26 @@ Classifies a search query into one of three routes for an online search engine:
 | Route | Typical query |
 |---|---|
 | `Hybrid Search` | `wireless headphones`, `red running shoes size 10 under $100` |
-| `Exact Match` | `SKU 4471-BX-200`, `"exact phrase"` |
+| `Exact Match` | `sku: 4471-BX-200` (a configured keyword, a colon, then a value) |
 | `Ask&Find` | `which laptop is better for video editing?` |
 
-It makes a single LLM call per query, using a few-shot system prompt and JSON output. The answer is validated against the three routes. If the model errors or returns something unusable, the agent falls back to a safe route (`Hybrid Search` by default), so a model failure never breaks search.
+Exact Match is a fixed rule, not a model decision. If the query has the form `{keyword}: {value}` and the keyword is listed in `config/exact_match_keywords.yaml`, the route is Exact Match and no model is called. Matching ignores case and allows spaces around the colon. Anything else, including `SKU 4471-BX-200` without the colon or `color: red` with an unlisted keyword, goes to the model.
+
+For everything else the agent makes a single LLM call, using a few-shot system prompt and JSON output. The model chooses only between Hybrid Search and Ask&Find. If it answers Exact Match anyway, the agent uses Hybrid Search. If the model errors or returns something unusable, the agent falls back to a safe route (`Hybrid Search` by default), so a model failure never breaks search.
 
 ## Layout
 
 ```
 prompts/system_prompt.md   System prompt template ({routes} and {examples} are filled in)
-prompts/examples.yaml      Few-shot examples  <-- put your examples here
+prompts/examples.yaml      Few-shot examples  <-- put your examples here (Hybrid Search / Ask&Find only)
+config/exact_match_keywords.yaml   Keywords that trigger Exact Match as "{keyword}: {value}"
 eval/dataset.jsonl         Labelled held-out queries for measuring accuracy
 src/intent_agent/
   routes.py                Route enum (the 3 valid labels)
   config.py                Env/.env driven settings
   llm.py                   Provider clients: OpenAI-compatible and Claude (Anthropic / Foundry)
-  classifier.py            Prompting, output parsing, fallback
+  exact_match.py           "{keyword}: {value}" rule for Exact Match
+  classifier.py            Exact Match rule, then prompting, output parsing, fallback
   api.py                   FastAPI service: POST /classify, GET /health, GET /routes
   web.py                   Browser demo: query form (/) and results page (/result)
   evaluate.py              Accuracy / per-route precision-recall / latency report
@@ -44,9 +48,13 @@ uv run pytest
 ```
 
 ```bash
-curl -s localhost:8000/classify -H 'content-type: application/json' -d '{"query":"MX-5500-B"}'
-# {"query":"MX-5500-B","route":"Exact Match","confidence":0.97,"fallback_used":false,
+curl -s localhost:8000/classify -H 'content-type: application/json' -d '{"query":"leather sofas under $1500"}'
+# {"query":"leather sofas under $1500","route":"Hybrid Search","confidence":0.93,"fallback_used":false,
 #  "model":"phi4-mini","latency_ms":212.4,"input_tokens":640,"output_tokens":14}
+
+curl -s localhost:8000/classify -H 'content-type: application/json' -d '{"query":"sku: MX-5500-B"}'
+# {"query":"sku: MX-5500-B","route":"Exact Match","confidence":1.0,"fallback_used":false,
+#  "model":"exact-match-rule","latency_ms":0.0,"input_tokens":null,"output_tokens":null}
 ```
 
 ### Browser demo
@@ -70,9 +78,10 @@ Switching models or providers only takes environment variables; see `.env.exampl
 
 ## Customizing
 
-1. **Examples:** replace the placeholders in `prompts/examples.yaml` with your own (3-8 per route, including boundary cases). Invalid route labels fail fast at startup.
-2. **Route definitions:** the definitions in `prompts/system_prompt.md` are my reading of the three routes. Adjust them to match how your search backend actually behaves.
-3. **Eval set:** grow `eval/dataset.jsonl` to 100+ real queries, ideally sampled from search logs and labelled by people. Keep it separate from the few-shot examples.
+1. **Exact Match keywords:** replace the placeholder keywords in `config/exact_match_keywords.yaml` with the ones your search backend supports.
+2. **Examples:** replace the placeholders in `prompts/examples.yaml` with your own (3-8 per route, including boundary cases). Only Hybrid Search and Ask&Find are allowed there; invalid route labels fail fast at startup.
+3. **Route definitions:** the definitions in `prompts/system_prompt.md` are my reading of the three routes. Adjust them to match how your search backend actually behaves.
+4. **Eval set:** grow `eval/dataset.jsonl` to 100+ real queries, ideally sampled from search logs and labelled by people. Keep it separate from the few-shot examples.
 
 ## Moving to Azure Foundry
 

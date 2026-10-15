@@ -44,11 +44,46 @@ def test_parse_response(text, expected):
 
 
 def test_classify_success():
-    c = make_classifier('{"route": "Exact Match", "confidence": 0.95}').classify("  SKU 123  ")
-    assert c.route == Route.EXACT_MATCH
+    c = make_classifier('{"route": "Ask&Find", "confidence": 0.95}').classify("  which bottle suits oils?  ")
+    assert c.route == Route.ASK_AND_FIND
     assert c.confidence == 0.95
     assert not c.fallback_used
-    assert c.query == "SKU 123"
+    assert c.query == "which bottle suits oils?"
+
+
+@pytest.mark.parametrize(
+    "query",
+    ["sku: 4471-BX-200", "SKU:4471", "dwg: A-10293", "  Mold :  M-552 ", "sup: Acme Plastics", "pid:100234", "cust: 88123"],
+)
+def test_exact_match_rule_skips_model(query):
+    classifier = make_classifier('{"route": "Hybrid Search", "confidence": 0.9}')
+    c = classifier.classify(query)
+    assert c.route == Route.EXACT_MATCH
+    assert c.confidence == 1.0
+    assert not c.fallback_used
+    assert c.model == "exact-match-rule"
+    assert classifier.client.calls == []
+
+
+@pytest.mark.parametrize("query", ["sku 4471-BX-200", "color: red", "part number: 88-1", "sku:", "find sku: 4471", "SKU-4471", "supplier: Acme"])
+def test_non_pattern_queries_go_to_model(query):
+    classifier = make_classifier('{"route": "Hybrid Search", "confidence": 0.9}')
+    c = classifier.classify(query)
+    assert c.route == Route.HYBRID_SEARCH
+    assert len(classifier.client.calls) == 1
+
+
+def test_model_exact_match_is_downgraded_to_hybrid():
+    c = make_classifier('{"route": "Exact Match", "confidence": 0.95}').classify("SKU 123")
+    assert c.route == Route.HYBRID_SEARCH
+    assert not c.fallback_used
+
+
+def test_exact_match_examples_are_rejected(tmp_path):
+    examples = tmp_path / "examples.yaml"
+    examples.write_text('examples:\n  - query: "sku: 1"\n    route: "Exact Match"\n')
+    with pytest.raises(ValueError, match="keyword rule"):
+        IntentClassifier(settings=Settings(_env_file=None, examples_path=examples), client=FakeLLM("{}"))
 
 
 def test_classify_falls_back_on_llm_error():
@@ -67,6 +102,7 @@ def test_system_prompt_includes_routes_and_examples():
     assert "Ask&Find" in classifier.system_prompt
     assert "{examples}" not in classifier.system_prompt
     assert "SKU 4471-BX-200" in classifier.system_prompt
+    assert '"Exact Match"' not in classifier.system_prompt
 
 
 def test_api_classify():

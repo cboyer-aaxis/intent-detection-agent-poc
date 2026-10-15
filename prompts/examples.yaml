@@ -2,13 +2,15 @@
 # PLACEHOLDERS: replace with real examples from your domain. Aim for 3-8 per route,
 # including tricky boundary cases. Keep these separate from eval/dataset.jsonl
 # so the eval measures generalization rather than memorization.
+# Only "Hybrid Search" and "Ask&Find" are allowed here: Exact Match is decided by the
+# "{keyword}: {value}" rule in config/exact_match_keywords.yaml, never by the model.
 examples:
   - query: "750ml Bottle"
     route: "Hybrid Search"
   - query: "PET Bottle"
     route: "Hybrid Search"
   - query: "SKU 4471-BX-200"
-    route: "Exact Match"
+    route: "Hybrid Search"
   - query: "Bottle for shampoo"
     route: "Hybrid Search"
   - query: "Can PET bottles hold essential oils?"

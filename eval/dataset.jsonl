@@ -1,12 +1,24 @@
 {"query": "garden hoses", "expected": "Hybrid Search"}
 {"query": "office chairs", "expected": "Hybrid Search"}
 {"query": "camping gear", "expected": "Hybrid Search"}
-{"query": "MX-5500-B", "expected": "Exact Match"}
-{"query": "order #A1029384", "expected": "Exact Match"}
-{"query": "ISBN 978-0-13-468599-1", "expected": "Exact Match"}
+{"query": "MX-5500-B", "expected": "Hybrid Search"}
+{"query": "order #A1029384", "expected": "Hybrid Search"}
+{"query": "ISBN 978-0-13-468599-1", "expected": "Hybrid Search"}
 {"query": "what's the difference between OLED and QLED?", "expected": "Ask&Find"}
 {"query": "what should I bring on a 3 day hiking trip", "expected": "Ask&Find"}
 {"query": "is this blender dishwasher safe", "expected": "Ask&Find"}
 {"query": "leather sofas under $1500 grey", "expected": "Hybrid Search"}
 {"query": "Nike womens jackets size M on sale", "expected": "Hybrid Search"}
 {"query": "4K monitors 27 inch rated 4 stars and up", "expected": "Hybrid Search"}
+{"query": "sku: 4471-BX-200", "expected": "Exact Match"}
+{"query": "SKU:MX-5500-B", "expected": "Exact Match"}
+{"query": "dwg: A-10293", "expected": "Exact Match"}
+{"query": "mold : M-552", "expected": "Exact Match"}
+{"query": "sup: Acme Plastics", "expected": "Exact Match"}
+{"query": "PID: 100234", "expected": "Exact Match"}
+{"query": "cust: 88123", "expected": "Exact Match"}
+{"query": "part number: 88-1029-A", "expected": "Hybrid Search"}
+{"query": "dwg A-10293", "expected": "Hybrid Search"}
+{"query": "color: red", "expected": "Hybrid Search"}
+{"query": "sku 4471-BX-200", "expected": "Hybrid Search"}
+{"query": "sku:", "expected": "Hybrid Search"}

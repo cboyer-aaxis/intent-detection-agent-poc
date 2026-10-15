@@ -6,6 +6,7 @@ import time
 from pydantic import BaseModel, Field
 
 from intent_agent.config import Settings, get_settings
+from intent_agent.exact_match import ExactMatcher, load_keywords
 from intent_agent.llm import LLMClient, build_client
 from intent_agent.prompt import build_system_prompt
 from intent_agent.routes import Route
@@ -32,10 +33,22 @@ class IntentClassifier:
         self.settings = settings or get_settings()
         self.client = client or build_client(self.settings)
         self.system_prompt = build_system_prompt(self.settings.system_prompt_path, self.settings.examples_path)
+        self.exact_matcher = ExactMatcher(load_keywords(self.settings.exact_match_keywords_path))
 
     def classify(self, query: str) -> Classification:
         query = query.strip()[: self.settings.max_query_chars]
         start = time.perf_counter()
+
+        # Exact Match is a deterministic rule: "{keyword}: {value}" with a configured keyword. No model call.
+        if self.exact_matcher.match(query):
+            return Classification(
+                query=query,
+                route=Route.EXACT_MATCH,
+                confidence=1.0,
+                model="exact-match-rule",
+                latency_ms=round((time.perf_counter() - start) * 1000, 1),
+            )
+
         route, confidence, fallback = self.settings.fallback_route, 0.0, True
         input_tokens = output_tokens = None
 
@@ -47,6 +60,10 @@ class IntentClassifier:
             if parsed:
                 route, confidence = parsed
                 fallback = False
+                if route == Route.EXACT_MATCH:
+                    # The query didn't match the keyword rule, so it can't be an Exact Match.
+                    logger.info("Model chose Exact Match for non-pattern query %r; using Hybrid Search", query)
+                    route = Route.HYBRID_SEARCH
             else:
                 logger.warning("Unparseable model output for query %r: %r", query, result.text)
         except Exception:

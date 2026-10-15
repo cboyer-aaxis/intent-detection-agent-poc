@@ -1,0 +1,12 @@
+# Keywords that trigger an Exact Match when a query has the form "{keyword}: {value}",
+# e.g. "sku: 4471-BX-200". Matching is case-insensitive and allows spaces around the colon.
+# Queries that don't follow that form, or use a keyword not listed here, go to the model
+# and are routed to Hybrid Search or Ask&Find.
+# List keywords without the colon.
+keywords:
+  - sku
+  - dwg
+  - mold
+  - sup
+  - pid
+  - cust

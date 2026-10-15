@@ -13,7 +13,7 @@ app = FastAPI(title="Intent Detection Demo", version="0.1.0", docs_url=None, red
 
 _ROUTE_DESCRIPTIONS = {
     Route.HYBRID_SEARCH: "Product or topic searches, with or without attributes like size, color or price.",
-    Route.EXACT_MATCH: "Identifiers such as SKUs, part numbers or quoted phrases.",
+    Route.EXACT_MATCH: "A configured keyword followed by a value, in the form keyword: value (e.g. sku: 4471-BX-200).",
     Route.ASK_AND_FIND: "Natural-language questions that need an answer, not just a list.",
 }
 

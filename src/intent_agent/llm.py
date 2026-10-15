@@ -4,12 +4,12 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from intent_agent.config import Settings
-from intent_agent.routes import Route
+from intent_agent.routes import LLM_ROUTES
 
 OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
-        "route": {"type": "string", "enum": Route.labels()},
+        "route": {"type": "string", "enum": [r.value for r in LLM_ROUTES]},
         "confidence": {"type": "number"},
     },
     "required": ["route", "confidence"],
