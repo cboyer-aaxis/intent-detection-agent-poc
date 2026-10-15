@@ -62,6 +62,8 @@ docker build -t intent-agent .
 docker run --rm --env-file .env -p 8000:8000 -p 8080:8080 intent-agent
 ```
 
+To use different ports inside the container, set `API_PORT` and/or `DEMO_PORT` (for example `-e API_PORT=8001`, or in `.env`). This is needed with `--network host`, where `-p` is ignored. With normal port mapping you can instead map a different host port, e.g. `-p 8001:8000`.
+
 If the model runs in Ollama on your machine, set `LLM_BASE_URL=http://host.docker.internal:11434/v1` in `.env`, because `localhost` inside the container is the container itself.
 
 Switching models or providers only takes environment variables; see `.env.example` for the Ollama, Azure Foundry (OpenAI-compatible), Claude-on-Foundry and Anthropic API profiles. Any OpenAI-compatible server works too (LM Studio, vLLM, llama.cpp server).
